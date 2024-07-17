@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Azure SignalR Client</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/5.0.9/signalr.min.js"></script>
+</head>
+<body>
+    <h1>Azure SignalR Client</h1>
+    <div id="messages"></div>
+
+    <script>
+        // Define the URL of your SignalR hub
+        const connection = new signalR.HubConnectionBuilder()
+            .withUrl("/myHub")
+            .configureLogging(signalR.LogLevel.Information)
+            .build();
+
+        // Start the connection
+        async function start() {
+            try {
+                await connection.start();
+                console.log("Connected to SignalR hub");
+            } catch (err) {
+                console.error("Error connecting to SignalR hub", err);
+                setTimeout(start, 5000);
+            }
+        }
+
+        connection.onclose(async () => {
+            await start();
+        });
+
+        // Function to receive messages from the hub
+        connection.on("ReceiveMessage", (user, message) => {
+            const msg = document.createElement("div");
+            msg.innerHTML = `<strong>${user}</strong>: ${message}`;
+            document.getElementById("messages").appendChild(msg);
+        });
+
+        // Start the connection
+        start();
+    </script>
+</body>
+</html>
